@@ -16,3 +16,7 @@ The canonical triage labels use the default names, with supplemental type labels
 ### Domain docs
 
 This repo uses a multi-context domain docs layout. See `docs/agents/domain.md`.
+
+### Documented solutions
+
+`docs/solutions/` contains documented solutions to past problems and workflow decisions, organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.

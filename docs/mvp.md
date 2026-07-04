@@ -9,14 +9,14 @@ The original idea was a Wasmtime/WIT plugin-host MVP. That is still part of the 
 The MVP now validates this product shape:
 
 - Rust core owns the daily agent loop.
-- Host-owned tools can read, search, edit, write, and run bash with explicit approval.
+- Host-owned tools can read, search, edit, write, and run shell with explicit approval.
 - Sessions are persistent, tree-capable, and auditable from day one.
 - Project context files are loaded automatically.
 - WASM Component plugins arrive after the host loop works, as a sandboxed extension firewall.
 
 ## 2. One-Line MVP Definition
 
-Build a Rust CLI that can run one real coding-agent session with Anthropic Messages, project context files, persistent JSONL sessions, host-owned read/search/edit/write/bash tools, approval gates, and an architecture-ready WASM plugin boundary to implement after the core loop works.
+Build a Rust CLI that can run one real coding-agent session with Anthropic Messages, project context files, persistent JSONL sessions, host-owned read/search/edit/write/shell tools, approval gates, and an architecture-ready WASM plugin boundary to implement after the core loop works.
 
 ## 3. Core Product Hypothesis
 
@@ -45,8 +45,8 @@ The first complete MVP includes:
   - search workspace,
   - propose/apply approved edits,
   - write approved files,
-  - run approved bash with timeout.
-- Approval pipeline for mutations and bash.
+  - run approved shell with timeout.
+- Approval pipeline for mutations and shell.
 - Workspace root detection and path containment.
 - Local audit events.
 - Structured errors.
@@ -130,7 +130,7 @@ The host mediates:
 - file access,
 - search,
 - edits and writes,
-- bash execution,
+- shell execution,
 - patch application,
 - LLM calls,
 - secrets access,
@@ -161,7 +161,7 @@ Initial crates/modules:
 2. `form-cli` crate — command parsing, config path resolution, top-level commands, and these internal modules until M1/M2 behavior proves a split is worth it:
    - `agent` — model loop, tool dispatch, turn lifecycle, retry boundaries.
    - `provider` — Anthropic Messages adapter first, behind a narrow trait.
-   - `tools` — host-owned read/search/write/edit/bash tools.
+   - `tools` — host-owned read/search/write/edit/shell tools.
    - `workspace` — root detection, path containment, text detection, search.
    - `session` — JSONL session store with tree-capable IDs.
    - `resources` — context file loading, later skills/prompts.
@@ -217,7 +217,7 @@ Deliverables:
 
 - Edit tool with diff preview and approval.
 - Write tool with approval.
-- Bash tool with approval, timeout, output caps, and cancellation.
+- Shell tool with approval, timeout, output caps, and cancellation.
 - Patch proposal validation and application.
 - Audit entries for approvals, denials, mutations, and timeouts.
 
@@ -261,7 +261,7 @@ Exit criteria:
 Core safety tests do not wait for M5:
 
 - M1 owns read/search path traversal, symlink escape, secret-deny, binary/oversized file, and output cap tests.
-- M2 owns edit/write/bash approval, timeout, cancellation, malformed patch, patch conflict, stale snapshot, and atomicity tests.
+- M2 owns edit/write/shell approval, timeout, cancellation, malformed patch, patch conflict, stale snapshot, and atomicity tests.
 - M4 owns plugin permission, trap, timeout, memory, and output-cap tests.
 
 M5 adds stress and malicious-input depth after those gates pass.
@@ -357,7 +357,7 @@ Session JSONL is the conversation-scoped source of truth. `form-audit` writes a 
 Write policy:
 
 - Normal turn/session entries are append + flush before the next model turn.
-- Approval decisions, mutation results, bash results, and audit entries that justify a mutation call `sync_data` or stronger before the mutation-dependent result is returned.
+- Approval decisions, mutation results, shell results, and audit entries that justify a mutation call `sync_data` or stronger before the mutation-dependent result is returned.
 - File creates/renames that matter for session/audit/mutation evidence sync the file and then the parent directory where supported.
 - Non-critical chat turns may batch/flush without fsync; mutation-critical evidence may not be batched past the mutation result.
 - If sync fails, stop the active turn and show a structured session/audit write error. Do not continue as if evidence was persisted.
@@ -409,7 +409,7 @@ trait HostTool {
 - `metrics`: duration, bytes read, output bytes, etc.
 - `error`: structured error, if any
 
-Mutation tools must call the approval pipeline before writing or running bash.
+Mutation tools must call the approval pipeline before writing or running shell.
 
 Async boundary default:
 
@@ -422,7 +422,7 @@ Async boundary default:
 `ApprovalRequest` fields:
 
 - `id`
-- `kind`: `write|edit|bash|plugin_patch`
+- `kind`: `write|edit|shell|plugin_patch`
 - `summary`
 - `path`
 - `command`
@@ -450,7 +450,7 @@ Interactive CLI behavior:
 Non-interactive behavior:
 
 - Reads/search are allowed.
-- write/edit/bash/plugin_patch are denied unless a future explicit `--allow-mutations` flag exists.
+- write/edit/shell/plugin_patch are denied unless a future explicit `--allow-mutations` flag exists.
 - No silent mutation in headless mode.
 
 ### 9.4 Patch Proposal
@@ -540,8 +540,8 @@ No plugin shell, env, network, direct writes, direct patch apply, or secrets.
 | Secret patterns | Read and search both apply secret-deny patterns before returning model-visible content or snippets. Deny `.env*`, SSH keys, known token files, and `~/.config` unless explicitly allowlisted later. |
 | File reads | Text only, max 256 KB per read in M1. Larger reads return a bounded error. |
 | Tool output | Return max 50 KB or 2000 lines to the model. Search stops work once caps are hit instead of scanning the full workspace first. Save full local log when available. |
-| Bash | Host-only, approval required, cwd = workspace root, timeout = 30s default, user env inherited, stdout/stderr capped. Approved bash is the user's shell, not a sandbox. Form protects against accidental model-requested mutation through approval, risk display, timeout, and output caps. |
-| Bash cancel | Ctrl-C sends kill to child process group, records `cancelled` result. |
+| Shell | Host-only, approval required, cwd = workspace root, timeout = 30s default, user env inherited, stdout/stderr capped. Approved shell is the user's shell, not a sandbox. Form protects against accidental model-requested mutation through approval, risk display, timeout, and output caps. |
+| Shell cancel | Ctrl-C sends kill to child process group, records `cancelled` result. |
 | Writes/edits | Approval required, diff displayed before mutation, atomic write via temp file + rename where possible. |
 | Plugin access | No shell, env, network, direct filesystem write, direct patch apply, or secrets. |
 | Audit timing | Append audit entry immediately after every approval decision, denied operation, mutation, timeout, or plugin permission error. |
@@ -609,7 +609,7 @@ Rules:
 - Create parent directories only after approval.
 - Atomic write where possible, using a temp file in the target directory.
 
-### 11.5 Bash Tool
+### 11.5 Shell Tool
 
 Purpose:
 
@@ -618,7 +618,7 @@ Purpose:
 Rules:
 
 - cwd is workspace root.
-- approved bash runs with the user's normal environment and network access; it is not sandboxed.
+- approved shell runs with the user's normal environment and network access; it is not sandboxed.
 - timeout defaults to 30 seconds.
 - stdout/stderr capped.
 - Ctrl-C kills child process group.
@@ -723,7 +723,7 @@ Line-mode turn UX contract:
 - Show one compact status line when a provider request starts, retries, or fails.
 - Show each tool call before execution with tool name and bounded summary.
 - Execute multiple tool calls sequentially in M1/M2 unless a later design adds parallel tool execution.
-- Show approval prompts inline at the point the mutation or bash command is requested.
+- Show approval prompts inline at the point the mutation or shell command is requested.
 - Ctrl-C during provider/tool execution cancels the active turn where possible and writes a cancelled session entry.
 - Malformed model tool output becomes a visible tool error and session entry, not a silent retry loop.
 - Print the final assistant text only after all required tool calls for that turn finish or fail safely.
@@ -795,7 +795,7 @@ Test:
 - `form chat` can run one provider turn with a mocked provider.
 - Context files load in the right order.
 - Read/search tools return bounded results and do not return secret-pattern snippets.
-- Edit/write/bash require approval.
+- Edit/write/shell require approval.
 - Denied approvals produce denied tool results.
 - Sessions append and resume.
 - Tool errors do not lose the session.
@@ -808,7 +808,7 @@ Test:
 - Symlink escape denial.
 - Secret path denial for both read and search.
 - Binary/oversized read denial.
-- Bash timeout and output caps.
+- Shell timeout and output caps.
 - Malformed patch denial.
 - Patch conflict denial.
 - Plugin permission denial in M4.
@@ -835,10 +835,10 @@ The daily-driver MVP is complete when:
 6. The CLI can list sessions and inspect the latest session timeline.
 7. The model can call read/search tools.
 8. Read/search enforce workspace containment, size limits, and secret-deny patterns.
-9. Edit/write/bash require explicit approval.
+9. Edit/write/shell require explicit approval.
 10. Denied approvals are represented as tool results.
 11. Approved edits/writes apply through host-owned code only.
-12. Approved bash runs with timeout and output caps.
+12. Approved shell runs with timeout and output caps.
 13. Tool errors do not crash the host or lose session state.
 14. Audit events are written for approvals, denials, mutations, and timeouts.
 15. Tests cover valid tool execution and denial cases.
@@ -943,7 +943,7 @@ Rule: every contract/module step lands with its smallest useful test in the same
 12. Implement approval request/result and audit writes.
 13. Implement patch proposal validation.
 14. Implement edit/write tools.
-15. Implement bash tool with approval, timeout, cancellation, and caps.
+15. Implement shell tool with approval, timeout, cancellation, and caps.
 16. Add session listing and basic resume selection.
 17. Add M3 fork/tree basics.
 18. Sketch plugin manifest constraints only; defer WIT design to M4.
@@ -962,10 +962,10 @@ Do not start with the WASM plugin runtime. First build the host agent loop:
 - JSONL sessions with `schema_version`, `session_id`, `branch_id`, `entry_id`, and `parent_entry_id`,
 - host-owned read/search tools,
 - approval pipeline,
-- host-owned edit/write/bash tools.
+- host-owned edit/write/shell tools.
 
 Keep all mutation inside the host. Plugins are M4 and may propose patches only.
 
-Use boring local storage first. Use explicit approval for every write/edit/bash action. Deny unsafe paths and plugin privileges by default. Prioritize a clean architecture spine that can grow into full Pi replacement without pretending to match every Pi command on day one. Start with `form-core` + `form-cli` and internal modules; split more crates only after behavior proves the seam.
+Use boring local storage first. Use explicit approval for every write/edit/shell action. Deny unsafe paths and plugin privileges by default. Prioritize a clean architecture spine that can grow into full Pi replacement without pretending to match every Pi command on day one. Start with `form-core` + `form-cli` and internal modules; split more crates only after behavior proves the seam.
 
 The MVP is done when Form can complete a small real coding task in this repo, persist the session, resume it, and safely mediate host tool mutations.

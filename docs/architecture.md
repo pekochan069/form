@@ -47,8 +47,8 @@ All failures use a common envelope: `kind`, `source`, `retryable`, `user_message
 - Read and search both apply workspace containment, deterministic traversal, default skip dirs, nested-repo boundaries, size caps, early-stop search limits, and secret-deny patterns before returning model-visible content.
 - Writes and edits revalidate path containment after approval and before mutation; new files validate nearest existing parent and create temp files inside the target directory.
 - Patch apply is atomic: stale snapshots, failed hunks, binary files, mode changes, renames, deletes, unclear line endings, and malformed diffs do not mutate files.
-- Mutations and bash require approval. Default answer is deny.
-- Approved bash is the user's shell, not a sandbox; Form prevents accidental model-requested mutation through approval, risk display, timeouts, and output caps.
+- Mutations and shell require approval. Default answer is deny.
+- Approved shell is the user's shell, not a sandbox; Form prevents accidental model-requested mutation through approval, risk display, timeouts, and output caps.
 - Approval/audit entries for mutation-critical events use `sync_data` or stronger before returning success; creates/renames also sync parent directories where supported.
 - Session/audit JSONL never silently drops corrupt data.
 - Session entries include `schema_version`, `session_id`, `branch_id`, `entry_id`, and `parent_entry_id` from M1.

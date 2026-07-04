@@ -1,0 +1,15 @@
+[package]
+name = "form-cli"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+form-core = { path = "../form-core" }
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "form"
+path = "src/main.rs"

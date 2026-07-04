@@ -1,0 +1,3 @@
+[workspace]
+members = ["crates/form-core", "crates/form-cli"]
+resolver = "3"

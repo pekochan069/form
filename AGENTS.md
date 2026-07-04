@@ -17,6 +17,8 @@ The canonical triage labels use the default names, with supplemental type labels
 
 This repo uses a multi-context domain docs layout. See `docs/agents/domain.md`.
 
+`CONCEPTS.md` contains shared domain vocabulary for entities, named processes, and status concepts; relevant when orienting to the codebase or discussing domain concepts.
+
 ### Documented solutions
 
 `docs/solutions/` contains documented solutions to past problems and workflow decisions, organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.

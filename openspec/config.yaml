@@ -2,7 +2,11 @@ schema: spec-driven
 
 context: |
   Tech stack: Rust (>=1.98.0 nightly)
+  Libraries: clap, ratatui, serde
   Domain: AI Agent
+
+  Cross-platform requirements:
+    - This tool runs on Linux AND Windows
 
 rules:
   specs:
@@ -11,6 +15,7 @@ rules:
     - Prefer user-facing product behavior and observable outcomes over internal implementation mechanics
     - Include HOW details only when the mechanism is part of the product contract
     - If we generate artifacts, specify deletion/modification by explicit list lookup, not pattern matching
+    - Windows doesn't support bash out of the box so when implementing stuff related to shell execution, make sure to make it runnable on windows too
 
   tasks:
     - Include cross-platform testing considerations
@@ -20,22 +25,3 @@ rules:
     - Use existing constants and lists - don't invent detection mechanisms
     - Prefer explicit lookups over pattern matching or regex
     - If we generate it, we track it by name in a constant
-
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours

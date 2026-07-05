@@ -1,5 +1,7 @@
 pub mod config;
+pub mod paths;
 pub mod resources;
+pub mod session;
 pub mod workspace;
 
 use clap::{Command, error::ErrorKind};

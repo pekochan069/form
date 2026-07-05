@@ -10,6 +10,9 @@ A Rust-native coding-agent harness where the host owns model calls, tool mediati
 ### Form Core
 The shared contract layer for Form domain data that other Form components use to agree on messages, sessions, tools, approvals, provider exchange, audit evidence, limits, patches, and plugin metadata.
 
+### Form CLI
+The command-line host surface for Form, responsible for local workspace orientation, configuration, resource loading, session storage, and user-facing runtime commands.
+
 ### Session Entry
 An append-only record in a Form conversation timeline with stable tree identity plus a kind-specific payload.
 

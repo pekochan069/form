@@ -2,6 +2,8 @@ pub mod config;
 pub mod resources;
 pub mod workspace;
 
+use clap::{Command, error::ErrorKind};
+
 pub struct CliOutput {
     pub exit_code: i32,
     pub stdout: String,
@@ -13,14 +15,24 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<str>,
 {
-    let mut args = args.into_iter();
-    match args.next().map(|arg| arg.as_ref().to_owned()).as_deref() {
-        None | Some("--help" | "-h") => success(help()),
-        Some("--version" | "-V") => success(version()),
-        Some(arg) => CliOutput {
-            exit_code: 2,
+    let args: Vec<String> = args
+        .into_iter()
+        .map(|arg| arg.as_ref().to_owned())
+        .collect();
+    let mut command = command();
+
+    if args.is_empty() {
+        return success(command.render_help().to_string());
+    }
+
+    match command.try_get_matches_from(std::iter::once("form".to_owned()).chain(args)) {
+        Ok(_) => success(String::new()),
+        Err(error) if error.kind() == ErrorKind::DisplayHelp => success(error.to_string()),
+        Err(error) if error.kind() == ErrorKind::DisplayVersion => success(error.to_string()),
+        Err(error) => CliOutput {
+            exit_code: error.exit_code(),
             stdout: String::new(),
-            stderr: format!("unknown argument: {arg}\n\n{}", help()),
+            stderr: error.to_string(),
         },
     }
 }
@@ -33,14 +45,16 @@ fn success(stdout: String) -> CliOutput {
     }
 }
 
-fn help() -> String {
-    "Form CLI\n\nUsage: form [--help] [--version]\n\nOptions:\n  -h, --help       Print help\n  -V, --version    Print version\n"
-        .to_owned()
+fn command() -> Command {
+    Command::new("form")
+        .about("Form CLI")
+        .version(version())
+        .disable_help_subcommand(true)
 }
 
 fn version() -> String {
     format!(
-        "form {} (form-core {})\n",
+        "{} (form-core {})",
         env!("CARGO_PKG_VERSION"),
         form_core::version()
     )
@@ -76,7 +90,7 @@ mod tests {
 
         assert_eq!(output.exit_code, 2);
         assert!(output.stdout.is_empty());
-        assert!(output.stderr.contains("unknown argument: chat"));
+        assert!(output.stderr.contains("unexpected argument 'chat'"));
         assert!(output.stderr.contains("Usage: form"));
     }
 }

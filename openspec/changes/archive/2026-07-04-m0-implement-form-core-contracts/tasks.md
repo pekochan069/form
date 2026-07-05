@@ -15,7 +15,7 @@
 - [x] 3.1 Implement message content, usage, tool call, and tool result contracts with lower_snake_case serde enum values.
 - [x] 3.2 Implement session entry contracts with `schema_version`, `session_id`, `branch_id`, `entry_id`, and nullable `parent_entry_id`.
 - [x] 3.3 Implement the shared structured error envelope with typed source and audit-level values.
-- [x] 3.4 Implement provider request/result contracts for Anthropic-ready message, tool schema, stop reason, usage, and raw provider ID data.
+- [x] 3.4 Implement provider request/result contracts for OpenAI-ready message, tool schema, stop reason, usage, and raw provider ID data.
 - [x] 3.5 Implement approval request/result, patch proposal, audit entry, and limit contracts as inert data shapes.
 - [x] 3.6 Implement plugin manifest constraint contracts with manifest fields, permissions, and command definitions only.
 

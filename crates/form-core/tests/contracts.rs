@@ -115,7 +115,7 @@ fn tool_contracts_round_trip() {
 #[test]
 fn provider_contracts_round_trip() {
     let request = ProviderRequest {
-        model: "claude-sonnet-4-5".to_owned(),
+        model: "gpt5.5".to_owned(),
         system: "You are Form.".to_owned(),
         messages: vec![ProviderMessage {
             role: MessageRole::User,

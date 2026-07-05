@@ -16,7 +16,7 @@ The MVP now validates this product shape:
 
 ## 2. One-Line MVP Definition
 
-Build a Rust CLI that can run one real coding-agent session with Anthropic Messages, project context files, persistent JSONL sessions, host-owned read/search/edit/write/shell tools, approval gates, and an architecture-ready WASM plugin boundary to implement after the core loop works.
+Build a Rust CLI that can run one real coding-agent session with OpenAI Responses, project context files, persistent JSONL sessions, host-owned read/search/edit/write/shell tools, approval gates, and an architecture-ready WASM plugin boundary to implement after the core loop works.
 
 ## 3. Core Product Hypothesis
 
@@ -37,7 +37,7 @@ The first complete MVP includes:
 
 - Rust CLI application.
 - Line-mode `form chat` command.
-- Anthropic Messages provider first.
+- OpenAI Responses provider first.
 - Project context loading from `FORM.md` and `AGENTS.md`.
 - Persistent JSONL session store with tree-capable IDs.
 - Host-owned tools:
@@ -160,7 +160,7 @@ Initial crates/modules:
 1. `form-core` crate — domain types: messages, tool calls, approvals, errors, limits.
 2. `form-cli` crate — command parsing, config path resolution, top-level commands, and these internal modules until M1/M2 behavior proves a split is worth it:
    - `agent` — model loop, tool dispatch, turn lifecycle, retry boundaries.
-   - `provider` — Anthropic Messages adapter first, behind a narrow trait.
+   - `provider` — OpenAI Responses adapter first, behind a narrow trait.
    - `tools` — host-owned read/search/write/edit/shell tools.
    - `workspace` — root detection, path containment, text detection, search.
    - `session` — JSONL session store with tree-capable IDs.
@@ -184,7 +184,7 @@ Deliverables:
 - Approval request/result model.
 - Patch proposal format.
 - Resource loading rules.
-- Anthropic provider request/result contract.
+- OpenAI provider request/result contract.
 - Plugin manifest constraints and host API constraints. WIT waits until M4, after M1/M2 prove the host APIs.
 
 No WIT or Wasmtime implementation in M0.
@@ -198,8 +198,8 @@ Exit criteria:
 Deliverables:
 
 - `form chat` line-mode CLI.
-- Anthropic Messages provider.
-- Config loading from `~/.form/config.toml` and `ANTHROPIC_API_KEY`.
+- OpenAI Responses provider.
+- Config loading from `~/.form/config.toml` and `OPENAI_API_KEY`.
 - Context file loading.
 - JSONL session append and resume latest.
 - Minimal session inspection: `form sessions` and `form inspect --latest`.
@@ -209,7 +209,7 @@ Deliverables:
 Exit criteria:
 
 - CI proves the loop with a scripted provider: context load, read/search tool call, tool result, and session append.
-- With `ANTHROPIC_API_KEY` set, a manual M1 smoke test proves Form can answer a real coding question in this repo, read files, search files, and persist the session.
+- With `OPENAI_API_KEY` set, a manual M1 smoke test proves Form can answer a real coding question in this repo, read files, search files, and persist the session.
 
 ### M2: Approved Mutation Tools
 
@@ -276,15 +276,15 @@ These are fixed defaults for the first implementation.
 
 ### Provider
 
-Use Anthropic Messages first.
+Use OpenAI Responses first.
 
-- Env: `ANTHROPIC_API_KEY`.
+- Env: `OPENAI_API_KEY`.
 - Config file: `~/.form/config.toml`.
-- Default model: `claude-sonnet-4-5` unless config overrides `model`.
+- Default model: `gpt5.5` unless config overrides `model`.
 - Streaming: off in M1. Print final assistant text after each turn.
-- Tool calls: map Anthropic `tool_use` blocks into internal `ToolCall { id, name, input_json }`.
+- Tool calls: map OpenAI tool call blocks into internal `ToolCall { id, name, input_json }`.
 - Retries: one retry on 429/5xx with exponential backoff. No retry after a mutation.
-- Tests use a scripted provider by default. Real Anthropic smoke tests are manual or ignored by default so CI does not need network or credentials.
+- Tests use a scripted provider by default. Real OpenAI smoke tests are manual or ignored by default so CI does not need network or credentials.
 
 ### Sessions
 
@@ -307,7 +307,7 @@ Load from the workspace root in this order:
 1. `FORM.md`
 2. `AGENTS.md`
 
-Concatenate in that order. Missing files are ignored. Do not load `CLAUDE.md` by default; it belongs to another agent ecosystem and can conflict with Form's safety model.
+Concatenate in that order. Missing files are ignored. Do not load `OTHER_AGENT.md` by default; it belongs to another agent ecosystem and can conflict with Form's safety model.
 
 ### Resources
 
@@ -507,7 +507,7 @@ Validation rules:
 - `raw_provider_id`
 - `error`
 
-M1 supports Anthropic Messages only. Other providers implement this internal request/result later.
+M1 supports OpenAI Responses only. Other providers implement this internal request/result later.
 
 ### 9.6 Plugin Manifest Sketch
 
@@ -828,7 +828,7 @@ Run in this repo:
 The daily-driver MVP is complete when:
 
 1. A Rust CLI binary runs `form chat`.
-2. The CLI loads Anthropic config and sends a model request.
+2. The CLI loads OpenAI config and sends a model request.
 3. The CLI loads context files in the defined order.
 4. The CLI creates and appends a JSONL session.
 5. The CLI can resume the latest session.
@@ -875,7 +875,7 @@ Providers differ in tool call formats, streaming, retry behavior, and auth.
 
 Mitigation:
 
-- Use Anthropic Messages only in M1.
+- Use OpenAI Responses only in M1.
 - Define internal provider request/result early.
 - Add providers later by adapting into the same internal types.
 
@@ -935,8 +935,8 @@ Rule: every contract/module step lands with its smallest useful test in the same
 4. Implement config loading.
 5. Implement workspace root detection and context file loading.
 6. Implement session append and resume latest.
-7. Before coding the Anthropic adapter, verify current Anthropic Messages/tool-use docs: model ID, tool schema, tool_result formatting, stop reasons, usage, error taxonomy, retry rules, and max token defaults.
-8. Implement Anthropic request/result mapping with mocked tests.
+7. Before coding the OpenAI adapter, verify current OpenAI Responses/tool-use docs: model ID, tool schema, tool_result formatting, stop reasons, usage, error taxonomy, retry rules, and max token defaults.
+8. Implement OpenAI request/result mapping with mocked tests.
 9. Implement tool trait and tool registry.
 10. Implement read/search tools with path containment and caps.
 11. Implement `form chat` loop with read/search tool dispatch.
@@ -957,7 +957,7 @@ You are implementing Form, a Rust-native daily-driver replacement for Pi.
 Do not start with the WASM plugin runtime. First build the host agent loop:
 
 - line-mode `form chat`,
-- Anthropic Messages provider,
+- OpenAI Responses provider,
 - `FORM.md` / `AGENTS.md` context loading,
 - JSONL sessions with `schema_version`, `session_id`, `branch_id`, `entry_id`, and `parent_entry_id`,
 - host-owned read/search tools,

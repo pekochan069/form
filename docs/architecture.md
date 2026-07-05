@@ -35,7 +35,7 @@ Rules:
 - `form-core` depends on no Form crate.
 - `provider` never depends on `tools`, `session`, `resources`, `approval`, or `plugin`.
 - `tools` never call `provider`; `agent` owns the next model turn.
-- `resources` owns `FORM.md` / `AGENTS.md` loading. `CLAUDE.md` is not loaded by default.
+- `resources` owns `FORM.md` / `AGENTS.md` loading. `OTHER_AGENT.md` is not loaded by default.
 - `plugin` never mutates workspace directly. It can request bounded host APIs and propose patches only. WIT design waits until M4, after host APIs are proven.
 
 ## Error envelope

@@ -3,7 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-pub const CONTEXT_FILE_NAMES: &[&str] = &["FORM.md", "AGENTS.md"];
+use crate::paths::CONTEXT_FILE_NAMES;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ContextFile {

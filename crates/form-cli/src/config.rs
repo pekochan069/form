@@ -3,6 +3,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::paths::{CONFIG_FILE_NAME, FORM_DIR_NAME};
+
 pub const DEFAULT_MODEL: &str = "gpt5.5";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -38,7 +40,7 @@ pub fn load_from(config_path: Option<&Path>, openai_api_key: Option<String>) -> 
 }
 
 pub fn default_config_path() -> Option<PathBuf> {
-    home_dir().map(|home| home.join(".form").join("config.toml"))
+    home_dir().map(|home| home.join(FORM_DIR_NAME).join(CONFIG_FILE_NAME))
 }
 
 fn parse_model(contents: &str) -> Option<String> {

@@ -7,6 +7,7 @@ use std::{
 
 use form_cli::{
     config::{DEFAULT_MODEL, load_from},
+    paths::{CONFIG_FILE_NAME, CONTEXT_FILE_NAMES},
     resources::load_context,
     session::{SessionJsonlError, SessionStore, read_jsonl_path, render_timeline, workspace_hash},
     workspace::{Workspace, is_secret_path},
@@ -78,7 +79,7 @@ fn config_uses_default_model_and_openai_api_key_without_file() {
 #[test]
 fn config_file_overrides_default_model() {
     let temp = TempDir::new("config");
-    let config_path = temp.path().join("config.toml");
+    let config_path = temp.path().join(CONFIG_FILE_NAME);
     fs::write(&config_path, "model = 'gpt-test-model' # comment\n").unwrap();
 
     let config = load_from(Some(&config_path), None).unwrap();
@@ -90,16 +91,16 @@ fn config_file_overrides_default_model() {
 #[test]
 fn context_loads_form_then_agents_and_ignores_extra_files() {
     let temp = TempDir::new("context");
-    fs::write(temp.path().join("FORM.md"), "form context").unwrap();
-    fs::write(temp.path().join("AGENTS.md"), "agents context").unwrap();
+    fs::write(temp.path().join(CONTEXT_FILE_NAMES[0]), "form context").unwrap();
+    fs::write(temp.path().join(CONTEXT_FILE_NAMES[1]), "agents context").unwrap();
     fs::write(temp.path().join("OTHER_AGENT.md"), "other agent context").unwrap();
 
     let files = load_context(temp.path()).unwrap();
 
     assert_eq!(files.len(), 2);
-    assert_eq!(files[0].name, "FORM.md");
+    assert_eq!(files[0].name, CONTEXT_FILE_NAMES[0]);
     assert_eq!(files[0].content, "form context");
-    assert_eq!(files[1].name, "AGENTS.md");
+    assert_eq!(files[1].name, CONTEXT_FILE_NAMES[1]);
     assert_eq!(files[1].content, "agents context");
 }
 

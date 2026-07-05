@@ -6,6 +6,7 @@ use std::{
     time::SystemTime,
 };
 
+use crate::paths::{FORM_DIR_NAME, SESSIONS_DIR_NAME};
 use form_core::SessionEntry;
 use serde_json::Value;
 use time::{OffsetDateTime, format_description::well_known::Rfc3339};
@@ -29,7 +30,7 @@ impl SessionStore {
     pub fn default_for_workspace(workspace_root: impl AsRef<Path>) -> io::Result<Self> {
         let home = home_dir().ok_or_else(|| invalid_input("home directory not found"))?;
         Ok(Self::for_workspace(
-            home.join(".form/sessions"),
+            home.join(FORM_DIR_NAME).join(SESSIONS_DIR_NAME),
             workspace_root,
         ))
     }

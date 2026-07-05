@@ -2,6 +2,24 @@
 
 - Don’t fight errors. If same error appears twice, research 3-5 likely fixes, choose the smallest safe fix, then implement.
 - Folow rules in `docs/rules/**`
+- Do not perform unrequested side effects. Only change code/docs/files explicitly needed for user request.
+- Do not mutate GitHub issues, PRs, labels, comments, project maps, git branches, commits, or other external state unless user explicitly asks for that specific mutation.
+- If a skill workflow suggests tracker or git writes but user did not explicitly request them, stop before that step and ask.
+
+## Workflow
+
+My typical workflow goes like this:
+
+`skill:wayfinder`
+-> `skill:openspec-propose`
+-> human review
+-> `skill:openspec-apply-change` and `skill:implement`
+-> `skill:code-review`
+-> final humal review
+-> `skill:ce-commit`
+-> pr
+
+If not asked with anything, follow this steps.
 
 ## Agent skills
 

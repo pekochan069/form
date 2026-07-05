@@ -1,3 +1,7 @@
+pub mod config;
+pub mod resources;
+pub mod workspace;
+
 pub struct CliOutput {
     pub exit_code: i32,
     pub stdout: String,
